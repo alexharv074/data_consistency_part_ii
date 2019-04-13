@@ -1,27 +1,17 @@
 require 'spec_helper'
-require 'inifile'
+require 'java-properties'
 
-describe 'puppet::agent' do
+describe 'javaprops' do
   it 'compiles' do
     is_expected.to compile
-    File.write('catalogs/puppet__agent.json', PSON.pretty_generate(catalogue))
+    File.write('catalogs/javaprops.json', PSON.pretty_generate(catalogue))
   end
 
-  it 'should contain file /etc/puppetlabs/puppet/puppet.conf' do
-    is_expected.to contain_file('/etc/puppetlabs/puppet/puppet.conf').with({
-      'ensure' => 'present',
-      'owner' => 'root',
-      'group' => 'root',
-      'mode' => '0444',
-    })
-  end
-
-  it 'certname in /etc/puppetlabs/puppet/puppet.conf should be correct' do
-    inifile_data = catalogue
-      .resource('file', '/etc/puppetlabs/puppet/puppet.conf')
+  it 'dataSource.username in /home/webapp/config.properties should be root' do
+    java_properties = catalogue
+      .resource('file', '/home/webapp/config.properties')
       .send(:parameters)[:content]
-    parsed = IniFile.new(:content => inifile_data)
-    expect(parsed.sections).to eq ['main']
-    expect(parsed['main']['certname']).to eq 'agent01.example.com'
+    parsed = JavaProperties.parse(java_properties)
+    expect(parsed[:"dataSource.username"]).to eq '"root"'
   end
 end
