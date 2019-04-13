@@ -15,4 +15,9 @@ describe 'loopback' do
       'mode' => '0444',
     })
   end
+
+  it '/server/config.json should be valid JSON' do
+    json_data = File.read('files/config.json')
+    expect { JSON.parse(json_data) }.to_not raise_error
+  end
 end
