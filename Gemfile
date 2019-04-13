@@ -10,6 +10,7 @@ group :tests do
   gem 'puppet-blacksmith',  :require => false
   gem 'puppet-strings',  :require => false
   gem 'CFPropertyList',  :require => false
+  gem 'inifile',      :require => false
 end
 
 group :system_tests do

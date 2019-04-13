@@ -1,14 +1,14 @@
 require 'spec_helper'
-require 'json'
+require 'inifile'
 
-describe 'loopback' do
+describe 'puppet::agent' do
   it 'compiles' do
     is_expected.to compile
-    File.write('catalogs/loopback.json', PSON.pretty_generate(catalogue))
+    File.write('catalogs/puppet__agent.json', PSON.pretty_generate(catalogue))
   end
 
-  it 'should contain file /server/config.json' do
-    is_expected.to contain_file('/server/config.json').with({
+  it 'should contain file /etc/puppetlabs/puppet/puppet.conf' do
+    is_expected.to contain_file('/etc/puppetlabs/puppet/puppet.conf').with({
       'ensure' => 'present',
       'owner' => 'root',
       'group' => 'root',
@@ -16,8 +16,12 @@ describe 'loopback' do
     })
   end
 
-  it '/server/config.json should be valid JSON' do
-    json_data = File.read('files/config.json')
-    expect { JSON.parse(json_data) }.to_not raise_error
+  it 'certname in /etc/puppetlabs/puppet/puppet.conf should be correct' do
+    inifile_data = catalogue
+      .resource('file', '/etc/puppetlabs/puppet/puppet.conf')
+      .send(:parameters)[:content]
+    parsed = IniFile.new(:content => inifile_data)
+    expect(parsed.sections).to eq ['main']
+    expect(parsed['main']['certname']).to eq 'agent01.example.com'
   end
 end
