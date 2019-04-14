@@ -1,17 +1,18 @@
 require 'spec_helper'
-require 'java-properties'
+require 'yaml'
 
-describe 'javaprops' do
+describe 'hiera' do
   it 'compiles' do
     is_expected.to compile
-    File.write('catalogs/javaprops.json', PSON.pretty_generate(catalogue))
+    File.write('catalogs/hiera.json', PSON.pretty_generate(catalogue))
   end
 
-  it 'dataSource.username in /home/webapp/config.properties should be root' do
-    java_properties = catalogue
-      .resource('file', '/home/webapp/config.properties')
+  it 'datadir in hiera.yaml should be correct' do
+    yaml_data = catalogue
+      .resource('file', '/etc/puppetlabs/puppet/hiera.yaml')
       .send(:parameters)[:content]
-    parsed = JavaProperties.parse(java_properties)
-    expect(parsed[:"dataSource.username"]).to eq '"root"'
+    parsed = YAML.load(yaml_data)
+    expect(parsed[:"yaml"][:"datadir"])
+      .to eq '/etc/puppetlabs/code/environments/%{::environment}/hieradata'
   end
 end
